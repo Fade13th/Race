@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class Controls : MonoBehaviour {
 
-    public float maxSpeed = 100;
-    public float acceleration = 1;
-    public float handling = 1;
+    public float maxSpeed;
+    public float acceleration;
+    public float handling;
 
-    private float speed = 0;
+    public float speed = 0;
     private bool canMove = true;
     private Rigidbody rigidbody;
     private Vector3 moveDirection;
     private CharacterController controller;
+    private float drag;
 
     private float gravity = 9.8f;
 
@@ -23,6 +24,7 @@ public class Controls : MonoBehaviour {
         rigidbody = GetComponent<Rigidbody>();
         controller = GetComponent<CharacterController>();
         distToGround = GetComponent<Collider>().bounds.extents.y;
+        drag = maxSpeed / acceleration;
 	}
 	
 	// Update is called once per frame
@@ -31,16 +33,21 @@ public class Controls : MonoBehaviour {
 
         speed += Input.GetAxis("Vertical") * acceleration;
 
-        if (speed > maxSpeed) speed = maxSpeed;
-
         if (speed < 0) speed = 0;
 
-        speed -= (speed / 10);
+        if (Input.GetAxis("Vertical") == 0) {
+            speed -= (speed / 10);
+        }
+        else {
+            speed -= (speed / drag);
+        }
+
+        if (speed > maxSpeed) speed = maxSpeed;
 
         // Move senteces
         transform.Rotate(new Vector3(0, 1, 0), Input.GetAxis("Horizontal") * handling);
 
-        moveDirection = new Vector3(speed, 0, 0);
+        moveDirection = new Vector3(0, 0, speed);
         if (!IsGrounded()) {
             moveDirection.y -= gravity;
         }
